@@ -1,16 +1,9 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const STEPS = [
-  ["collect", "1 · Collect", "CSV, tenant, approval ref"],
-  ["plan", "2 · Plan", "read console, dedupe, map roles"],
-  ["approve", "3 · Approve", "human signs off the plan"],
-  ["apply", "4 · Apply", "create users in batches"],
-  ["verify", "5 · Verify", "re-read user list"],
-  ["report", "Report", "created / skipped / failed"],
-];
+const STEPS = [["collect", "Collect"], ["plan", "Plan"], ["approve", "Approve"], ["apply", "Apply"], ["verify", "Verify"], ["report", "Report"]];
 const TRANSIENT = new Set(["collected", "planning", "approved", "applying", "verifying"]);
 
-let state = { runId: null, lastEvent: 0, planHash: null, tab: "created", timer: null, data: null };
+let state = { runId: null, lastEvent: 0, planKey: null, tab: "created", timer: null, data: null };
 
 async function api(path, opts = {}) {
   const res = await fetch(path, opts);
@@ -30,8 +23,8 @@ async function loadInfo() {
   $("llm-chip").textContent = "LLM: " + info.llm;
   $("console-link").href = info.console_url;
   $("scenario-list").innerHTML = info.scenarios.map((s) => `
-    <div class="scn"><b>${s.id} · ${esc(s.title)}</b><span class="muted">Expected: ${esc(s.expected)}</span>
-    <button class="btn small" data-tc="${s.id}">Set up console &amp; plan</button></div>`).join("");
+    <button class="tc-row" data-tc="${s.id}" title="Expected: ${esc(s.expected)}">
+      <b>${s.id}</b><span>${esc(s.title)}</span><i>▶</i></button>`).join("");
   document.querySelectorAll("[data-tc]").forEach((b) => b.onclick = async () => {
     b.disabled = true;
     try { const r = await api(`/api/scenarios/${b.dataset.tc}`, { method: "POST" }); openRun(r.run_id); }
@@ -41,29 +34,28 @@ async function loadInfo() {
 
 async function loadRuns() {
   const runs = await api("/api/runs");
-  $("run-list").innerHTML = runs.map((r) => `
+  $("run-count").textContent = runs.length || "";
+  $("run-list").innerHTML = runs.slice(0, 12).map((r) => `
     <a href="#${r.id}" class="${r.id === state.runId ? "active" : ""}" data-run="${r.id}">
-      <b>${esc(r.scenario || r.csv_name)}</b> · ${esc(r.tenant)}<br>
-      <span class="muted">${esc(r.created_at.replace("T", " ").replace("Z", ""))} · ${esc(r.status)}${r.verdict ? " · " + r.verdict.toUpperCase() : ""}</span>
+      <b>${esc(r.scenario || r.csv_name)}</b>
+      <span class="muted">${esc(r.created_at.slice(11, 16))} · ${esc(r.verdict ? r.verdict.toUpperCase() : r.status.replace(/_/g, " "))}</span>
     </a>`).join("") || '<span class="muted">No runs yet</span>';
   document.querySelectorAll("[data-run]").forEach((a) => a.onclick = (e) => { e.preventDefault(); openRun(a.dataset.run); });
 }
 
 async function loadPolicy() {
   const rows = await api("/api/policy/acme");
-  $("policy-list").innerHTML = rows.map((r) => `<div><span>${esc(r.csv_role)} → <b>${esc(r.console_role)}</b>
-      <span class="muted">approved by ${esc(r.approved_by)} · used ${r.times_used}× · first: ${esc(r.decided_by)}</span></span>
+  $("policy-count").textContent = rows.length || "";
+  $("policy-list").innerHTML = rows.map((r) => `<div title="Approved by ${esc(r.approved_by)} · used ${r.times_used}× · first decided by ${esc(r.decided_by)}">
+      <span>${esc(r.csv_role)} → <b>${esc(r.console_role)}</b></span>
       <button title="Forget this mapping" data-forget="${esc(r.csv_role)}">×</button></div>`).join("")
-    || '<span class="muted">Nothing learned yet — approve a plan to teach it.</span>';
+    || '<span class="muted small">Nothing learned yet.</span>';
   document.querySelectorAll("[data-forget]").forEach((b) => b.onclick = async () => {
     await api(`/api/policy/acme?csv_role=${encodeURIComponent(b.dataset.forget)}`, { method: "DELETE" });
     loadPolicy();
   });
 }
-$("btn-clear-policy").onclick = async () => {
-  await api("/api/policy/acme", { method: "DELETE" });
-  loadPolicy();
-};
+$("btn-clear-policy").onclick = async () => { await api("/api/policy/acme", { method: "DELETE" }); loadPolicy(); };
 
 // ------------------------------------------------------------------ new run
 $("btn-new").onclick = () => { state.runId = null; clearTimeout(state.timer); show("new"); location.hash = ""; };
@@ -80,9 +72,11 @@ $("new-form").onsubmit = async (e) => {
 // ------------------------------------------------------------------ run view
 function openRun(id) {
   clearTimeout(state.timer);
-  state = { ...state, runId: id, lastEvent: 0, planHash: null, tab: "created", data: null };
+  state = { ...state, runId: id, lastEvent: 0, planKey: null, tab: "created", data: null };
   $("log").innerHTML = "";
   $("approver").value = "";
+  $("admin-grants").checked = false;
+  $("live-shot").removeAttribute("src");
   location.hash = id;
   show("run");
   poll();
@@ -98,8 +92,7 @@ async function poll() {
     render(d);
     loadRuns();
     loadPolicy();
-    const again = d.busy || TRANSIENT.has(d.run.status);
-    state.timer = setTimeout(poll, again ? 1000 : 4000);
+    state.timer = setTimeout(poll, d.busy || TRANSIENT.has(d.run.status) ? 1000 : 4000);
   } catch (e) {
     state.timer = setTimeout(poll, 3000);
   }
@@ -108,16 +101,16 @@ async function poll() {
 function render(d) {
   const r = d.run;
   $("run-title").textContent = r.scenario ? `${r.scenario} · ${d.scenario_info.title}` : r.csv_name;
-  $("run-meta").innerHTML = `Run <span class="mono">${esc(r.id)}</span> · tenant <b>${esc(r.tenant)}</b>` +
-    (d.tenant_info ? ` (${esc(d.tenant_info.display_name)})` : "") + ` · approval ref: ${esc(r.approval_ref)}` +
+  $("run-meta").innerHTML = `Tenant <b>${esc(d.tenant_info ? d.tenant_info.display_name : r.tenant)}</b> · ref ${esc(r.approval_ref)}` +
     (r.approved_by ? ` · approved by <b>${esc(r.approved_by)}</b>` : "");
+  $("run-meta").title = r.id;
   $("run-status").className = "pill " + r.status;
   $("run-status").textContent = r.status.replace(/_/g, " ");
-  $("busy").textContent = d.busy ? "agent working…" : "";
+  $("busy").textContent = d.busy ? "working…" : "";
 
   const idx = STEPS.findIndex((s) => s[0] === r.stage);
   $("stepper").innerHTML = STEPS.map((s, i) =>
-    `<li class="${i < idx || r.status === "completed" ? "done" : i === idx ? "current" : ""}"><b>${s[1]}</b>${s[2]}</li>`).join("");
+    `<li class="${i < idx || r.status === "completed" ? "done" : i === idx ? "current" : ""}">${s[1]}</li>`).join("");
 
   $("error-card").classList.toggle("hidden", !r.error || r.status !== "error");
   $("error-card").innerHTML = `<b>Stopped:</b> ${esc(r.error)}`;
@@ -134,12 +127,11 @@ function renderScenario(d) {
   if (!d.scenario_info) { card.classList.add("hidden"); return; }
   card.classList.remove("hidden");
   const res = d.scenario_result;
-  card.innerHTML = `<div class="card-head"><h3>Official test case ${esc(d.run.scenario)}</h3>
-      <span class="pill ${res ? res.verdict : ""}">${res ? res.verdict.replace("_", " ").toUpperCase() : "NOT RUN YET"}</span></div>
-    <div class="muted">Scenario: ${esc(d.scenario_info.title)} · Input: ${esc(d.scenario_info.csv)} ·
-      <b>Expected: ${esc(d.scenario_info.expected)}</b></div>
-    ${res ? `<div style="margin-top:6px">Actual: ${esc(res.detail)}</div>
-      <ul class="checks">${res.checks.map(([n, ok]) => `<li>${ok ? "✅" : "❌"} ${esc(n)}</li>`).join("")}</ul>` : ""}`;
+  const verdict = res ? res.verdict.replace("_", " ").toUpperCase() : "NOT RUN YET";
+  card.innerHTML = `<span><b>Expected:</b> ${esc(d.scenario_info.expected)}</span>
+    <span class="pill ${res ? res.verdict : ""}">${verdict}</span>
+    ${res ? `<details><summary>${esc(res.detail)}</summary>
+      <ul class="checks">${res.checks.map(([n, ok]) => `<li>${ok ? "✅" : "❌"} ${esc(n)}</li>`).join("")}</ul></details>` : ""}`;
 }
 
 function renderLog(events) {
@@ -156,31 +148,47 @@ function renderLog(events) {
 function renderPlan(d) {
   $("plan-card").classList.remove("hidden");
   const r = d.run, c = d.plan_counts;
-  $("plan-hash").textContent = "plan " + r.plan_hash;
-  $("plan-stats").innerHTML = [["create", c.create], ["skip", c.skip], ["needs review", c.review],
-    ["batches", c.batches], ["privileged", c.privileged]].map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join("");
-  $("role-source").textContent = d.role_source ? `· mapped by ${d.role_source}` : "";
-
   const editable = r.status === "awaiting_approval" && !d.busy;
-  if (state.planHash !== r.plan_hash + editable) {  // rebuild tables only when the plan changes
-    state.planHash = r.plan_hash + editable;
-    $("role-table").innerHTML = `<tr><th>CSV role</th><th>Console role</th><th>Confidence</th><th>Source</th><th>Status</th><th>Reason</th></tr>` +
-      Object.entries(d.role_mappings).map(([csvRole, m]) => `<tr><td>${esc(csvRole)}</td>
-        <td>${editable ? `<select data-role="${esc(csvRole)}">${["", ...d.console_roles].map((o) =>
-          `<option ${o === (m.console_role || "") ? "selected" : ""} value="${esc(o)}">${o || "—"}</option>`).join("")}</select>` : esc(m.console_role || "—")}</td>
-        <td>${(m.confidence * 100).toFixed(0)}%</td><td><span class="tag ${m.source === "policy" ? "policy" : ""}">${esc(m.source)}</span></td>
-        <td><span class="tag ${m.status}">${esc(m.status)}</span></td><td class="muted">${esc(m.reason)}</td></tr>`).join("");
-    document.querySelectorAll("[data-role]").forEach((s) => s.onchange = async () => {
-      if (!s.value) return;
-      try { await api(`/api/runs/${r.id}/roles`, { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ csv_role: s.dataset.role, console_role: s.value }) }); poll(); }
-      catch (e) { alert(e.message); }
-    });
-    $("plan-table").innerHTML = `<tr><th>Line</th><th>Record ID</th><th>Name</th><th>Email</th><th>CSV role</th><th>Console role</th><th>Decision</th><th>Batch</th><th>Reason</th></tr>` +
-      d.items.map((i) => `<tr><td>${i.line}</td><td class="mono">${esc(i.record_id)}</td><td>${esc(i.name)}</td><td>${esc(i.email)}</td>
-        <td>${esc(i.csv_role)}</td><td>${esc(i.target_role || "—")}</td><td><span class="tag ${i.action}">${esc(i.action)}</span></td>
-        <td>${i.batch ?? ""}</td><td class="muted">${esc(i.reason)}</td></tr>`).join("");
-  }
+  const parts = [`<b>${c.create}</b> to create`];
+  if (c.skip) parts.push(`<b>${c.skip}</b> skipped`);
+  if (c.review) parts.push(`<b class="warn-text">${c.review}</b> need review`);
+  if (c.privileged) parts.push(`<b class="warn-text">${c.privileged}</b> admin`);
+  parts.push(`${c.batches} batch${c.batches === 1 ? "" : "es"}`);
+  $("plan-summary").innerHTML = parts.join(" · ") + (d.role_source ? ` · roles by ${esc(d.role_source)}` : "");
+
+  const key = r.plan_hash + editable;
+  if (state.planKey === key) return;  // rebuild only when the plan or its editability changes
+  const firstRender = state.planKey === null || state.planKey.endsWith("true") !== editable;
+  state.planKey = key;
+  if (firstRender) $("plan-details").open = editable;  // fold the plan away once it's approved
+
+  $("role-table").innerHTML = `<tr><th>Job title (CSV)</th><th>Console role</th><th>Confidence</th><th>Source</th></tr>` +
+    Object.entries(d.role_mappings).map(([csvRole, m]) => `<tr>
+      <td>${esc(csvRole)}<div class="why" title="${esc(m.reason)}">${esc(m.source === "policy" ? `learned · approved by ${m.approved_by || "?"}` : m.reason)}</div></td>
+      <td>${editable ? `<select data-role="${esc(csvRole)}">${["", ...d.console_roles].map((o) =>
+        `<option ${o === (m.console_role || "") ? "selected" : ""} value="${esc(o)}">${o || "—"}</option>`).join("")}</select>`
+        : `<b>${esc(m.console_role || "—")}</b>`}
+        ${m.status !== "ok" ? `<span class="tag ${m.status}">${esc(m.status)}</span>` : ""}</td>
+      <td>${(m.confidence * 100).toFixed(0)}%</td>
+      <td><span class="tag ${m.source === "policy" ? "policy" : ""}">${esc(m.source)}</span></td></tr>`).join("");
+  document.querySelectorAll("[data-role]").forEach((s) => s.onchange = async () => {
+    if (!s.value) return;
+    try { await api(`/api/runs/${r.id}/roles`, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ csv_role: s.dataset.role, console_role: s.value }) }); poll(); }
+    catch (e) { alert(e.message); }
+  });
+
+  const exceptions = d.items.filter((i) => i.action !== "create" || (i.reason || "").includes("PRIVILEGED"));
+  $("exceptions").innerHTML = exceptions.map((i) => `<div><span class="tag ${i.action === "create" ? "privileged" : i.action}">
+      ${i.action === "create" ? "admin" : esc(i.action)}</span> <b>L${i.line}</b> ${esc(i.email)} <span class="muted">— ${esc(i.reason)}</span></div>`).join("")
+    || '<span class="muted small">None. Every row will be created with its mapped role.</span>';
+
+  $("row-count").textContent = d.items.length;
+  $("plan-table").innerHTML = `<tr><th>Line</th><th>Name</th><th>Email</th><th>Role</th><th>Decision</th><th>Batch</th></tr>` +
+    d.items.map((i) => `<tr title="${esc(i.record_id)} · ${esc(i.reason)}"><td>${i.line}</td><td>${esc(i.name)}</td><td>${esc(i.email)}</td>
+      <td>${esc(i.csv_role)} → <b>${esc(i.target_role || "—")}</b></td><td><span class="tag ${i.action}">${esc(i.action)}</span></td>
+      <td>${i.batch ?? ""}</td></tr>`).join("");
+
   $("approve-box").classList.toggle("hidden", !editable);
   $("admin-box").classList.toggle("hidden", !c.privileged);
   $("admin-count").textContent = c.privileged;
@@ -209,26 +217,28 @@ function renderResult(d) {
   if (!has) return;
   $("btn-retry").classList.toggle("hidden", !(["needs_retry", "error"].includes(d.run.status) && !d.busy));
   const groups = { created: [], skipped: [], failed: [], pending: [] };
-  d.items.forEach((i) => {
-    const g = { verified: "created", skipped: "skipped", failed: "failed" }[i.status] || "pending";
-    groups[g].push(i);
-  });
+  d.items.forEach((i) => groups[{ verified: "created", skipped: "skipped", failed: "failed" }[i.status] || "pending"].push(i));
   $("result-tabs").innerHTML = Object.entries(groups).map(([k, v]) =>
-    `<button data-tab="${k}" class="${state.tab === k ? "active" : ""}">${k[0].toUpperCase() + k.slice(1)} (${v.length})</button>`).join("");
+    `<button data-tab="${k}" class="${state.tab === k ? "active" : ""} ${v.length && k === "failed" ? "bad" : ""}">
+      ${k[0].toUpperCase() + k.slice(1)} <b>${v.length}</b></button>`).join("");
   document.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => { state.tab = b.dataset.tab; renderResult(state.data); });
-  const rows = groups[state.tab];
-  $("result-table").innerHTML = `<tr><th>Line</th><th>Record ID</th><th>Email</th><th>Role</th><th>Status</th><th>Reason</th><th>Observed in console</th><th>Evidence</th></tr>` +
-    (rows.map((i) => {
+
+  $("result-table").innerHTML = `<tr><th>Line</th><th>Email</th><th>Role</th><th>Reason</th><th>Evidence</th></tr>` +
+    (groups[state.tab].map((i) => {
       const v = i.evidence.verification || {};
-      return `<tr><td>${i.line}</td><td class="mono">${esc(i.record_id)}</td><td>${esc(i.email)}</td><td>${esc(i.target_role || "—")}</td>
-        <td><span class="tag ${i.status}">${esc(i.status)}</span></td><td class="muted">${esc(i.reason)}</td>
-        <td class="muted">${v.at ? (v.found ? `${esc(v.observed_role)} · ${v.occurrences}× · ${esc(v.at.slice(11, 19))}` : `not found · ${esc(v.at.slice(11, 19))}`) : "—"}</td>
-        <td class="shots">${i.screenshots.map((s, n) => `<a href="${s}" target="_blank">shot ${n + 1}</a>`).join("")}</td></tr>`;
-    }).join("") || `<tr><td colspan="8" class="muted">None</td></tr>`);
-  $("attempt-table").innerHTML = `<tr><th>Attempt</th><th>Created this attempt</th><th>Total created</th><th>Skipped</th><th>Failed</th><th>Pending</th><th>Duplicates in console</th><th>Verified at</th></tr>` +
-    (d.attempt_summaries.map((a) => `<tr><td>#${a.attempt}</td><td>${a.created_this_attempt}</td><td>${a.created}</td><td>${a.skipped}</td>
-      <td>${a.failed}</td><td>${a.pending}</td><td>${a.duplicate_emails_in_console.length || "none"}</td><td>${esc(a.verified_at)}</td></tr>`).join("")
-      || `<tr><td colspan="8" class="muted">Running…</td></tr>`);
+      const seen = v.at ? (v.found ? `Seen in console as ${v.observed_role}, ${v.occurrences}× at ${v.at.slice(11, 19)}` : `Not found at ${v.at.slice(11, 19)}`) : "";
+      return `<tr><td title="${esc(i.record_id)}">${i.line}</td><td>${esc(i.email)}</td><td>${esc(i.target_role || "—")}</td>
+        <td class="muted" title="${esc(seen)}">${esc(i.reason)}</td>
+        <td class="shots">${i.screenshots.length ? `<a href="${i.screenshots[0]}" target="_blank">before</a>` : ""}
+          ${i.screenshots.length > 1 ? `<a href="${i.screenshots[i.screenshots.length - 1]}" target="_blank">after</a>` : ""}</td></tr>`;
+    }).join("") || `<tr><td colspan="5" class="muted">None</td></tr>`);
+
+  const a = d.attempt_summaries;
+  const showAttempts = a.length > 1 || (a[0] && (a[0].failed || a[0].pending));
+  $("attempts-wrap").classList.toggle("hidden", !showAttempts);
+  $("attempt-table").innerHTML = `<tr><th>Attempt</th><th>Created this attempt</th><th>Total created</th><th>Failed</th><th>Pending</th><th>Duplicates</th></tr>` +
+    a.map((x) => `<tr><td>#${x.attempt}</td><td><b>${x.created_this_attempt}</b></td><td>${x.created}</td><td>${x.failed}</td>
+      <td>${x.pending}</td><td>${x.duplicate_emails_in_console.length || "none"}</td></tr>`).join("");
 }
 
 // ------------------------------------------------------------------ boot
