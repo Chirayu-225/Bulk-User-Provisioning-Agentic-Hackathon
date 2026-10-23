@@ -49,7 +49,8 @@ def collect(tenant: str, csv_text: str, csv_name: str, approval_ref: str,
     if errors:
         raise ValueError("; ".join(errors))
     run_id = ledger.create_run(tenant, scenario, approval_ref.strip(), csv_name,
-                               {"role_policy": role_policy or {}, "llm_provider": llm.provider_label()})
+                               {"role_policy": role_policy or {}, "llm_provider": llm.provider_label(),
+                                "csv_text": csv_text[:200_000]})
     ledger.insert_items(run_id, records)
     invalid = sum(1 for r in records if r["problem"])
     dups = sum(1 for r in records if r["duplicate_of"])
@@ -386,3 +387,30 @@ def report(run_id: str) -> dict:
         key = {"verified": "created", "skipped": "skipped", "failed": "failed"}.get(it["status"], "pending")
         groups[key].append(it)
     return {"run": run, "items": items, "groups": groups}
+
+
+def evidence(run_id: str) -> dict:
+    """Everything a reviewer needs to audit one run, in one JSON document."""
+    rep = report(run_id)
+    run, data = rep["run"], rep["run"]["data"]
+    return {
+        "run_id": run["id"], "created_at": run["created_at"], "tenant": run["tenant"],
+        "scenario": run["scenario"], "scenario_result": data.get("scenario_result"),
+        "input": {"csv_name": run["csv_name"], "approval_ref": run["approval_ref"], "csv_text": data.get("csv_text")},
+        "observed_console": {"tenant": data.get("tenant_info"), "form_fields": data.get("field_map"),
+                             "roles_offered": data.get("console_roles"),
+                             "users_before_plan": len((data.get("console_snapshot") or {}).get("users", {})),
+                             "snapshot_at": (data.get("console_snapshot") or {}).get("at")},
+        "plan": {"hash": run["plan_hash"], "counts": data.get("plan_counts"), "role_mappings": data.get("role_mappings"),
+                 "role_source": data.get("role_source")},
+        "approval": {"approved_by": run["approved_by"], "approved_at": run["approved_at"],
+                     "approved_hash": run["approved_hash"], "admin_grants_approved": bool(run["admin_grants_approved"])},
+        "attempts": data.get("attempt_summaries", []),
+        "summary": data.get("summary"),
+        "results": {group: [{"record_id": i["record_id"], "line": i["line"], "name": i["name"], "email": i["email"],
+                             "csv_role": i["csv_role"], "role": i["target_role"], "status": i["status"],
+                             "reason": i["reason"], "evidence": i["evidence"]} for i in items]
+                    for group, items in rep["groups"].items()},
+        "events": [{"ts": e["ts"], "step": e["step"], "level": e["level"], "message": e["message"]}
+                   for e in ledger.get_events(run_id)],
+    }

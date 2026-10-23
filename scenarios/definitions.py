@@ -50,6 +50,13 @@ def setup_console(tc: str) -> None:
     requests.post(f"{base}/__control/config", json=SCENARIOS[tc]["console"], timeout=10).raise_for_status()
 
 
+def apply_console_config(tc: str) -> None:
+    """Re-asserts this scenario's console switches without wiping users (used at approval time,
+    so another reviewer's scenario can't silently change the trap under an approved run)."""
+    base = config.CONSOLE_URL.rstrip("/")
+    requests.post(f"{base}/__control/config", json=SCENARIOS[tc]["console"], timeout=10).raise_for_status()
+
+
 def evaluate(run_id: str) -> dict:
     run = ledger.get_run(run_id)
     items = ledger.get_items(run_id)

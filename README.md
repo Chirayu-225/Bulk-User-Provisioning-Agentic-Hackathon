@@ -132,6 +132,16 @@ All four pass, both from the dashboard and from the CLI runner. Evidence files a
 | Proof | "Script finished" | Independent re-read, per-user evidence and screenshots |
 | LLM outage | Fails | Model failover, then deterministic rules |
 
+### Built for reviewers
+
+| Feature | What it does |
+|---|---|
+| **Quick start** | The home screen walks a reviewer through running a test case in 3 steps |
+| **Shared-console guard** | Only one run can use the demo console at a time. A test case plan waiting for approval holds the console for up to 15 minutes, so two reviewers can't reset each other's runs. At approval, the test case's console settings are re-applied. |
+| **Input CSV** | Every run links to the exact CSV it was given (`/api/runs/<id>/input.csv`) |
+| **Download evidence** | One JSON per run (`/api/runs/<id>/evidence.json`): input, console state observed, plan and role reasoning, approval, every action with screenshots, verification and the full event log |
+| **Health check** | `/healthz` for an uptime pinger, so the free server stays awake during judging |
+
 ---
 
 ## 6. Tech stack

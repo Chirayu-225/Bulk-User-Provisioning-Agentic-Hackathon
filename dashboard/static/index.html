@@ -24,6 +24,7 @@
 
     <h3>Official test cases</h3>
     <div id="scenario-list" class="tc-list"></div>
+    <p class="error small" id="tc-msg"></p>
 
     <details class="fold">
       <summary>Learned role policy <span class="count" id="policy-count"></span></summary>
@@ -41,6 +42,17 @@
   <main id="main">
     <!-- New run -->
     <section id="view-new" class="view">
+      <div class="card narrow quick">
+        <h2>For reviewers: try it in 3 steps</h2>
+        <ol class="steps">
+          <li>Click a test case on the left. <b>TC3</b> (console defaults to Admin) is the best first one.</li>
+          <li>Review the plan the agent built, type your name and click <b>Approve &amp; create users</b>.</li>
+          <li>Watch the live browser view and activity log, then check the <b>PASS</b> badge and the before/after evidence.</li>
+        </ol>
+        <p class="muted small">The demo runs on a free server: the first load and each run can take 1–3 minutes.
+          Only one run can use the shared demo console at a time. The admin console is under “Admin console ↗”
+          (login <span class="mono">it.admin</span> / <span class="mono">demo-pass-123</span>).</p>
+      </div>
       <div class="card narrow">
         <h2>New provisioning run</h2>
         <p class="muted">Upload an approved CSV with columns <span class="mono">name, email, role</span> (department optional).
@@ -63,6 +75,7 @@
         <div>
           <h2 id="run-title">Run</h2>
           <div class="muted" id="run-meta"></div>
+          <div class="run-links"><a id="link-input" target="_blank">Input CSV</a> · <a id="link-evidence">Download evidence (JSON)</a></div>
         </div>
         <span class="pill" id="run-status">…</span>
       </div>

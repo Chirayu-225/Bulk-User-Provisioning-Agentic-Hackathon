@@ -1,17 +1,19 @@
 """Dashboard API + static UI for the Bulk User Provisioning Agent."""
+import json
 import sys
 import threading
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import config  # noqa: E402
 from agent import ledger, llm, pipeline  # noqa: E402
-from scenarios.definitions import SCENARIOS, csv_text, setup_console  # noqa: E402
+from scenarios.definitions import SCENARIOS, apply_console_config, csv_text, setup_console  # noqa: E402
 
 STATIC = Path(__file__).resolve().parent / "static"
 app = FastAPI(title="Bulk User Provisioning Agent")
@@ -35,6 +37,30 @@ def _background(run_id: str, fn, *args) -> None:
     t = threading.Thread(target=runner, daemon=True)
     _jobs[run_id] = t
     t.start()
+
+
+PENDING_HOLD_SECONDS = 15 * 60  # a scenario plan waiting for approval holds the shared console this long
+
+
+def _console_guard(run_id: str | None = None, check_pending: bool = True) -> None:
+    """The mock console is shared by everyone using the demo. Refuse to start a new run that would
+    reset or change it while another run is working, or while another reviewer's test case plan is
+    still waiting for approval (stale plans stop holding it after 15 minutes)."""
+    for rid, job in _jobs.items():
+        if job.is_alive() and rid != run_id:
+            run = ledger.get_run(rid) or {}
+            raise HTTPException(409, f"Another run ({run.get('scenario') or run.get('csv_name') or rid}) is in "
+                                     f"progress on the shared demo console. Please try again in a minute or two.")
+    if not check_pending:
+        return
+    now = datetime.now(timezone.utc)
+    for r in ledger.list_runs(limit=20):
+        if r["id"] == run_id or not r["scenario"] or r["status"] != "awaiting_approval":
+            continue
+        created = datetime.strptime(r["created_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        if (now - created).total_seconds() < PENDING_HOLD_SECONDS:
+            raise HTTPException(409, f"Another reviewer's {r['scenario']} plan is waiting for approval on the shared "
+                                     f"demo console. Open it from Run history, or try again in a few minutes.")
 
 
 def _shot_url(path: str | None) -> str | None:
@@ -69,6 +95,7 @@ def runs():
 
 @app.post("/api/runs")
 def new_run(tenant: str = Form(...), approval_ref: str = Form(...), csv_file: UploadFile = File(...)):
+    _console_guard()
     text = csv_file.file.read().decode("utf-8", errors="replace")
     try:
         run_id = pipeline.collect(tenant, text, csv_file.filename or "upload.csv", approval_ref)
@@ -83,6 +110,7 @@ def start_scenario(tc: str):
     tc = tc.upper()
     if tc not in SCENARIOS:
         raise HTTPException(404, "Unknown scenario")
+    _console_guard()
     try:
         setup_console(tc)
     except Exception as exc:
@@ -162,10 +190,17 @@ class Approval(BaseModel):
 
 @app.post("/api/runs/{run_id}/approve")
 def approve(run_id: str, body: Approval):
+    _console_guard(run_id, check_pending=False)
     try:
         pipeline.approve(run_id, body.approver, body.plan_hash, body.admin_grants)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
+    run = ledger.get_run(run_id)
+    if run["scenario"]:
+        try:  # make sure this test case's console switches are still the ones it was planned with
+            apply_console_config(run["scenario"])
+        except Exception as exc:
+            ledger.log(run_id, "apply", f"Could not re-assert scenario console settings: {exc}", level="warn")
     _background(run_id, pipeline.apply)
     return {"ok": True}
 
@@ -175,7 +210,31 @@ def retry(run_id: str):
     run = ledger.get_run(run_id)
     if not run or run["status"] not in ("needs_retry", "error"):
         raise HTTPException(400, "Nothing to retry")
+    _console_guard(run_id, check_pending=False)
     _background(run_id, pipeline.retry)
+    return {"ok": True}
+
+
+@app.get("/api/runs/{run_id}/input.csv", response_class=PlainTextResponse)
+def run_input(run_id: str):
+    run = ledger.get_run(run_id)
+    if not run:
+        raise HTTPException(404, "Run not found")
+    return PlainTextResponse(run["data"].get("csv_text") or "(input not stored for this run)")
+
+
+@app.get("/api/runs/{run_id}/evidence.json")
+def run_evidence(run_id: str):
+    if not ledger.get_run(run_id):
+        raise HTTPException(404, "Run not found")
+    body = json.dumps(pipeline.evidence(run_id), indent=2, default=str)
+    return PlainTextResponse(body, media_type="application/json",
+                             headers={"Content-Disposition": f'attachment; filename="{run_id}-evidence.json"'})
+
+
+@app.get("/healthz")
+def healthz():
+    """Lightweight endpoint for an uptime pinger, so the free server stays awake during judging."""
     return {"ok": True}
 
 

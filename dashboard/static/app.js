@@ -27,8 +27,9 @@ async function loadInfo() {
       <b>${s.id}</b><span>${esc(s.title)}</span><i>▶</i></button>`).join("");
   document.querySelectorAll("[data-tc]").forEach((b) => b.onclick = async () => {
     b.disabled = true;
+    $("tc-msg").textContent = "";
     try { const r = await api(`/api/scenarios/${b.dataset.tc}`, { method: "POST" }); openRun(r.run_id); }
-    catch (e) { alert(e.message); } finally { b.disabled = false; }
+    catch (e) { $("tc-msg").textContent = e.message; } finally { b.disabled = false; }
   });
 }
 
@@ -104,6 +105,8 @@ function render(d) {
   $("run-meta").innerHTML = `Tenant <b>${esc(d.tenant_info ? d.tenant_info.display_name : r.tenant)}</b> · ref ${esc(r.approval_ref)}` +
     (r.approved_by ? ` · approved by <b>${esc(r.approved_by)}</b>` : "");
   $("run-meta").title = r.id;
+  $("link-input").href = `/api/runs/${r.id}/input.csv`;
+  $("link-evidence").href = `/api/runs/${r.id}/evidence.json`;
   $("run-status").className = "pill " + r.status;
   $("run-status").textContent = r.status.replace(/_/g, " ");
   $("busy").textContent = d.busy ? "working…" : "";

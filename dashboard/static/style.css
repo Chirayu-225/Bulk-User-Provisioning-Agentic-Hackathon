@@ -129,3 +129,9 @@ details.fold.inner { margin-top: 12px; }
 #log { max-height: 460px; }
 @media (max-width: 1200px) { .grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } .row2 { grid-template-columns: 1fr; } }
+
+.quick { border-color: var(--primary); background: var(--info-bg); }
+.steps { margin: 8px 0 12px; padding-left: 22px; font-size: 14px; line-height: 1.6; }
+.run-links { font-size: 13px; margin-top: 4px; }
+.run-links a { color: var(--primary); }
+#tc-msg { margin: 6px 0 0; font-size: 12px; }
