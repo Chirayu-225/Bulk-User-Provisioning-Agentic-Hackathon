@@ -1,0 +1,161 @@
+{
+  "test_case": "TC3",
+  "scenario": "Console defaults new users to Admin",
+  "expected": "Corrected before save",
+  "run_id": "run-20261023-135902-110",
+  "verdict": "pass",
+  "detail": "all checks passed",
+  "checks": [
+    [
+      "console pre-selected Admin on the form (trap active)",
+      true
+    ],
+    [
+      "agent corrected the role before every save",
+      true
+    ],
+    [
+      "all users verified with intended roles",
+      true
+    ],
+    [
+      "no user ended up as Admin",
+      true
+    ]
+  ],
+  "input_csv": "tc3_console_defaults_admin.csv",
+  "console_setup": {
+    "default_role_admin": true,
+    "fail_at": null
+  },
+  "approved_by": "scenario-runner (--yes flag, scripted approval)",
+  "plan_hash": "fae3a19bb35bc99f",
+  "attempt_summaries": [
+    {
+      "created": 5,
+      "skipped": 0,
+      "failed": 0,
+      "pending": 0,
+      "console_total_after": 7,
+      "duplicate_emails_in_console": [],
+      "verified_at": "2026-10-23T08:29:09Z",
+      "attempt": 1,
+      "created_this_attempt": 5
+    }
+  ],
+  "results": {
+    "created": [
+      {
+        "record_id": "L002-6d2c63",
+        "line": 2,
+        "email": "kavya.pillai@acme.example",
+        "role": "Manager",
+        "reason": "Verified in console as Manager",
+        "verification": {
+          "at": "2026-10-23T08:29:09Z",
+          "found": true,
+          "observed_role": "Manager",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L003-0b2f9a",
+        "line": 3,
+        "email": "aditya.malhotra@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:09Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L004-367657",
+        "line": 4,
+        "email": "nisha.chopra@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:09Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L005-a154f0",
+        "line": 5,
+        "email": "ishaan.mehta@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:09Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L006-4f91e2",
+        "line": 6,
+        "email": "tara.nair@acme.example",
+        "role": "Billing",
+        "reason": "Verified in console as Billing",
+        "verification": {
+          "at": "2026-10-23T08:29:09Z",
+          "found": true,
+          "observed_role": "Billing",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      }
+    ],
+    "skipped": [],
+    "failed": [],
+    "pending": []
+  },
+  "events": [
+    "2026-10-23T08:29:02Z [collect] Loaded 5 rows from tc3_console_defaults_admin.csv for tenant 'acme' (approval ref: SCENARIO-TC3) \u2014 0 invalid, 0 duplicate email(s)",
+    "2026-10-23T08:29:02Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:02Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:02Z [observe] Read 2 existing users across 1 page(s)",
+    "2026-10-23T08:29:02Z [observe] Inspected 'Add user' form: 4 fields",
+    "2026-10-23T08:29:07Z [reason] Form fields identified (llm): name \u2192 'full_name', email \u2192 'work_email', role \u2192 'access_role'. Matched the fields 'full_name', 'work_email', and 'access_role' based on their labels and attribute names.",
+    "2026-10-23T08:29:07Z [observe] Console offers roles: Admin, Manager, Member, Billing, Viewer",
+    "2026-10-23T08:29:07Z [memory] Loaded saved role policy for 4 of 4 job title(s) (approved in earlier runs): Engineering Manager \u2192 Manager, Finance Analyst \u2192 Billing, Software Engineer \u2192 Member, Support Agent \u2192 Member",
+    "2026-10-23T08:29:07Z [reason] Role 'Engineering Manager' \u2192 Manager (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:07Z [reason] Role 'Finance Analyst' \u2192 Billing (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:07Z [reason] Role 'Software Engineer' \u2192 Member (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:07Z [reason] Role 'Support Agent' \u2192 Member (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:07Z [plan] Plan ready (fae3a19bb35bc99f): create 5 in 1 batch(es) of 5, skip 0, review 0. Waiting for human approval.",
+    "2026-10-23T08:29:07Z [approve] Plan fae3a19bb35bc99f approved by scenario-runner (--yes flag, scripted approval) \u2014 5 user(s) to create",
+    "2026-10-23T08:29:07Z [apply] Apply attempt #1 started",
+    "2026-10-23T08:29:07Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:07Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:07Z [observe] Read 2 existing users across 1 page(s)",
+    "2026-10-23T08:29:07Z [reconcile] Reconciled ledger with live console: 5 user(s) still need creating",
+    "2026-10-23T08:29:07Z [apply] Batch 1: creating 5 user(s)",
+    "2026-10-23T08:29:07Z [guard] kavya.pillai@acme.example: console pre-selected 'Admin' \u2014 corrected to 'Manager' before save",
+    "2026-10-23T08:29:08Z [apply] Created kavya.pillai@acme.example as Manager (line 2)",
+    "2026-10-23T08:29:08Z [guard] aditya.malhotra@acme.example: console pre-selected 'Admin' \u2014 corrected to 'Member' before save",
+    "2026-10-23T08:29:08Z [apply] Created aditya.malhotra@acme.example as Member (line 3)",
+    "2026-10-23T08:29:08Z [guard] nisha.chopra@acme.example: console pre-selected 'Admin' \u2014 corrected to 'Member' before save",
+    "2026-10-23T08:29:08Z [apply] Created nisha.chopra@acme.example as Member (line 4)",
+    "2026-10-23T08:29:08Z [guard] ishaan.mehta@acme.example: console pre-selected 'Admin' \u2014 corrected to 'Member' before save",
+    "2026-10-23T08:29:08Z [apply] Created ishaan.mehta@acme.example as Member (line 5)",
+    "2026-10-23T08:29:08Z [guard] tara.nair@acme.example: console pre-selected 'Admin' \u2014 corrected to 'Billing' before save",
+    "2026-10-23T08:29:08Z [apply] Created tara.nair@acme.example as Billing (line 6)",
+    "2026-10-23T08:29:08Z [checkpoint] Checkpoint saved after batch 1 \u2014 5 created so far",
+    "2026-10-23T08:29:09Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:09Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:09Z [observe] Read 7 existing users across 1 page(s)",
+    "2026-10-23T08:29:09Z [verify] Verification (fresh session, 1 page(s)): 5 created, 0 skipped, 0 failed, 0 pending",
+    "2026-10-23T08:29:09Z [scenario] TC3: PASS \u2014 all checks passed"
+  ]
+}

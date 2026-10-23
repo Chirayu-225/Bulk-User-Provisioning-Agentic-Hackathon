@@ -1,0 +1,417 @@
+{
+  "test_case": "TC4",
+  "scenario": "Batch fails at user 12",
+  "expected": "Retry creates only the missing users",
+  "run_id": "run-20261023-135909-645",
+  "verdict": "pass",
+  "detail": "all checks passed",
+  "checks": [
+    [
+      "first attempt halted with 11 created",
+      true
+    ],
+    [
+      "retry created only the missing users",
+      true
+    ],
+    [
+      "all 20 users verified after retry",
+      true
+    ],
+    [
+      "no duplicate accounts created",
+      true
+    ]
+  ],
+  "input_csv": "tc4_batch_fails_at_12.csv",
+  "console_setup": {
+    "default_role_admin": false,
+    "fail_at": 12,
+    "fail_mode": "before_save",
+    "fail_once": true
+  },
+  "approved_by": "scenario-runner (--yes flag, scripted approval)",
+  "plan_hash": "dcb7007cc509c506",
+  "attempt_summaries": [
+    {
+      "created": 11,
+      "skipped": 0,
+      "failed": 1,
+      "pending": 8,
+      "console_total_after": 13,
+      "duplicate_emails_in_console": [],
+      "verified_at": "2026-10-23T08:29:18Z",
+      "attempt": 1,
+      "created_this_attempt": 11
+    },
+    {
+      "created": 20,
+      "skipped": 0,
+      "failed": 0,
+      "pending": 0,
+      "console_total_after": 22,
+      "duplicate_emails_in_console": [],
+      "verified_at": "2026-10-23T08:29:21Z",
+      "attempt": 2,
+      "created_this_attempt": 9
+    }
+  ],
+  "results": {
+    "created": [
+      {
+        "record_id": "L002-2660ec",
+        "line": 2,
+        "email": "isha.kapoor@acme.example",
+        "role": "Manager",
+        "reason": "Verified in console as Manager",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Manager",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L003-f93732",
+        "line": 3,
+        "email": "arjun.verma@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L004-cabf6b",
+        "line": 4,
+        "email": "saanvi.reddy@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L005-9a14a2",
+        "line": 5,
+        "email": "reyansh.kulkarni@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L006-315a98",
+        "line": 6,
+        "email": "kavya.menon@acme.example",
+        "role": "Billing",
+        "reason": "Verified in console as Billing",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Billing",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L007-258b42",
+        "line": 7,
+        "email": "aditya.singh@acme.example",
+        "role": "Viewer",
+        "reason": "Verified in console as Viewer",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Viewer",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L008-87d455",
+        "line": 8,
+        "email": "nisha.rao@acme.example",
+        "role": "Viewer",
+        "reason": "Verified in console as Viewer",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Viewer",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L009-fc4bd9",
+        "line": 9,
+        "email": "ishaan.das@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L010-b434b7",
+        "line": 10,
+        "email": "tara.pillai@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L011-37b68f",
+        "line": 11,
+        "email": "dev.malhotra@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L012-9a21b5",
+        "line": 12,
+        "email": "riya.chopra@acme.example",
+        "role": "Manager",
+        "reason": "Verified in console as Manager",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Manager",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L013-0488ac",
+        "line": 13,
+        "email": "kunal.mehta@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L014-4c88dc",
+        "line": 14,
+        "email": "pooja.nair@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L015-796d9f",
+        "line": 15,
+        "email": "aarav.shah@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L016-45d43e",
+        "line": 16,
+        "email": "diya.joshi@acme.example",
+        "role": "Billing",
+        "reason": "Verified in console as Billing",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Billing",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L017-7e1566",
+        "line": 17,
+        "email": "kabir.bose@acme.example",
+        "role": "Viewer",
+        "reason": "Verified in console as Viewer",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Viewer",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L018-ca001e",
+        "line": 18,
+        "email": "meera.sen@acme.example",
+        "role": "Viewer",
+        "reason": "Verified in console as Viewer",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Viewer",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L019-57b566",
+        "line": 19,
+        "email": "rohan.bhat@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=2"
+        }
+      },
+      {
+        "record_id": "L020-7b8b0e",
+        "line": 20,
+        "email": "ananya.iyer@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=3"
+        }
+      },
+      {
+        "record_id": "L021-3a6ab2",
+        "line": 21,
+        "email": "vihaan.gupta@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:21Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users?page_no=3"
+        }
+      }
+    ],
+    "skipped": [],
+    "failed": [],
+    "pending": []
+  },
+  "events": [
+    "2026-10-23T08:29:09Z [collect] Loaded 20 rows from tc4_batch_fails_at_12.csv for tenant 'acme' (approval ref: SCENARIO-TC4) \u2014 0 invalid, 0 duplicate email(s)",
+    "2026-10-23T08:29:10Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:10Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:10Z [observe] Read 2 existing users across 1 page(s)",
+    "2026-10-23T08:29:10Z [observe] Inspected 'Add user' form: 4 fields",
+    "2026-10-23T08:29:14Z [reason] Form fields identified (llm): name \u2192 'full_name', email \u2192 'work_email', role \u2192 'access_role'. The fields 'full_name', 'work_email', and 'access_role' directly match the requirements for full name, email address, and role.",
+    "2026-10-23T08:29:14Z [observe] Console offers roles: Admin, Manager, Member, Billing, Viewer",
+    "2026-10-23T08:29:14Z [memory] Loaded saved role policy for 7 of 7 job title(s) (approved in earlier runs): Auditor \u2192 Viewer, Contractor \u2192 Viewer, Engineering Manager \u2192 Manager, Finance Analyst \u2192 Billing, Product Designer \u2192 Member, Software Engineer \u2192 Member, Support Agent \u2192 Member",
+    "2026-10-23T08:29:14Z [reason] Role 'Auditor' \u2192 Viewer (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:14Z [reason] Role 'Contractor' \u2192 Viewer (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:14Z [reason] Role 'Engineering Manager' \u2192 Manager (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:14Z [reason] Role 'Finance Analyst' \u2192 Billing (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:14Z [reason] Role 'Product Designer' \u2192 Member (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:14Z [reason] Role 'Software Engineer' \u2192 Member (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:14Z [reason] Role 'Support Agent' \u2192 Member (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:29:14Z [plan] Plan ready (dcb7007cc509c506): create 20 in 4 batch(es) of 5, skip 0, review 0. Waiting for human approval.",
+    "2026-10-23T08:29:14Z [approve] Plan dcb7007cc509c506 approved by scenario-runner (--yes flag, scripted approval) \u2014 20 user(s) to create",
+    "2026-10-23T08:29:14Z [apply] Apply attempt #1 started",
+    "2026-10-23T08:29:14Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:14Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:14Z [observe] Read 2 existing users across 1 page(s)",
+    "2026-10-23T08:29:14Z [reconcile] Reconciled ledger with live console: 20 user(s) still need creating",
+    "2026-10-23T08:29:14Z [apply] Batch 1: creating 5 user(s)",
+    "2026-10-23T08:29:15Z [apply] Created isha.kapoor@acme.example as Manager (line 2)",
+    "2026-10-23T08:29:15Z [apply] Created arjun.verma@acme.example as Member (line 3)",
+    "2026-10-23T08:29:15Z [apply] Created saanvi.reddy@acme.example as Member (line 4)",
+    "2026-10-23T08:29:15Z [apply] Created reyansh.kulkarni@acme.example as Member (line 5)",
+    "2026-10-23T08:29:16Z [apply] Created kavya.menon@acme.example as Billing (line 6)",
+    "2026-10-23T08:29:16Z [checkpoint] Checkpoint saved after batch 1 \u2014 5 created so far",
+    "2026-10-23T08:29:16Z [apply] Batch 2: creating 5 user(s)",
+    "2026-10-23T08:29:16Z [apply] Created aditya.singh@acme.example as Viewer (line 7)",
+    "2026-10-23T08:29:16Z [apply] Created nisha.rao@acme.example as Viewer (line 8)",
+    "2026-10-23T08:29:16Z [apply] Created ishaan.das@acme.example as Member (line 9)",
+    "2026-10-23T08:29:16Z [apply] Created tara.pillai@acme.example as Member (line 10)",
+    "2026-10-23T08:29:17Z [apply] Created dev.malhotra@acme.example as Member (line 11)",
+    "2026-10-23T08:29:17Z [checkpoint] Checkpoint saved after batch 2 \u2014 10 created so far",
+    "2026-10-23T08:29:17Z [apply] Batch 3: creating 5 user(s)",
+    "2026-10-23T08:29:17Z [apply] Created riya.chopra@acme.example as Manager (line 12)",
+    "2026-10-23T08:29:17Z [apply] FAILED creating kunal.mehta@acme.example (line 13): Something went wrong while saving. Please try again later. (Error 500)",
+    "2026-10-23T08:29:17Z [apply] Halted at line 13 (kunal.mehta@acme.example). 8 user(s) not attempted. Progress is checkpointed \u2014 Retry will create only the missing users.",
+    "2026-10-23T08:29:18Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:18Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:18Z [observe] Read 13 existing users across 2 page(s)",
+    "2026-10-23T08:29:18Z [verify] Verification (fresh session, 2 page(s)): 11 created, 0 skipped, 1 failed, 8 pending",
+    "2026-10-23T08:29:18Z [scenario] TC4: IN_PROGRESS \u2014 First attempt halted at user 12 as expected (11 created, 1 failed, 8 pending) \u2014 run Retry",
+    "2026-10-23T08:29:18Z [retry] Retry requested \u2014 using the already-approved plan; only missing users will be created",
+    "2026-10-23T08:29:18Z [apply] Apply attempt #2 started",
+    "2026-10-23T08:29:18Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:18Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:19Z [observe] Read 13 existing users across 2 page(s)",
+    "2026-10-23T08:29:19Z [reconcile] Reconciled ledger with live console: 9 user(s) still need creating; 1 adjustment(s)",
+    "2026-10-23T08:29:19Z [apply] Batch 3: creating 4 user(s)",
+    "2026-10-23T08:29:19Z [apply] Created kunal.mehta@acme.example as Member (line 13)",
+    "2026-10-23T08:29:19Z [apply] Created pooja.nair@acme.example as Member (line 14)",
+    "2026-10-23T08:29:19Z [apply] Created aarav.shah@acme.example as Member (line 15)",
+    "2026-10-23T08:29:19Z [apply] Created diya.joshi@acme.example as Billing (line 16)",
+    "2026-10-23T08:29:19Z [checkpoint] Checkpoint saved after batch 3 \u2014 4 created so far",
+    "2026-10-23T08:29:19Z [apply] Batch 4: creating 5 user(s)",
+    "2026-10-23T08:29:20Z [apply] Created kabir.bose@acme.example as Viewer (line 17)",
+    "2026-10-23T08:29:20Z [apply] Created meera.sen@acme.example as Viewer (line 18)",
+    "2026-10-23T08:29:20Z [apply] Created rohan.bhat@acme.example as Member (line 19)",
+    "2026-10-23T08:29:20Z [apply] Created ananya.iyer@acme.example as Member (line 20)",
+    "2026-10-23T08:29:21Z [apply] Created vihaan.gupta@acme.example as Member (line 21)",
+    "2026-10-23T08:29:21Z [checkpoint] Checkpoint saved after batch 4 \u2014 9 created so far",
+    "2026-10-23T08:29:21Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:21Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:21Z [observe] Read 22 existing users across 3 page(s)",
+    "2026-10-23T08:29:21Z [verify] Verification (fresh session, 3 page(s)): 20 created, 0 skipped, 0 failed, 0 pending",
+    "2026-10-23T08:29:21Z [scenario] TC4: PASS \u2014 all checks passed"
+  ]
+}

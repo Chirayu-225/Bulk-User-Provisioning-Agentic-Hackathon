@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bulk User Provisioning Agent</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>Bulk User Provisioning Agent</h1>
+    <span class="sub">Creates users and roles in an admin console that has no API: plan → human approval → apply → verify</span>
+  </div>
+  <div class="topmeta">
+    <span class="chip" id="llm-chip">LLM: …</span>
+    <a class="chip link" id="console-link" target="_blank">Open admin console ↗</a>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <button class="btn primary full" id="btn-new">+ New provisioning run</button>
+    <h3>Official test cases</h3>
+    <div id="scenario-list"></div>
+    <h3>Learned role policy · acme</h3>
+    <p class="muted small">Title → role mappings a human approved. Reused in future runs instead of asking the LLM again.</p>
+    <div id="policy-list" class="policy-list"></div>
+    <button class="btn small" id="btn-clear-policy">Forget all</button>
+    <h3>Run history</h3>
+    <div id="run-list" class="run-list"></div>
+  </aside>
+
+  <main id="main">
+    <!-- New run -->
+    <section id="view-new" class="view">
+      <div class="card narrow">
+        <h2>Step 1 · Collect the details</h2>
+        <p class="muted">Upload the approved CSV (columns: name, email, role, optional department), choose the tenant,
+          and record who approved the list.</p>
+        <form id="new-form">
+          <label>Tenant <input name="tenant" value="acme" required></label>
+          <label>Approval reference <input name="approval_ref" placeholder="e.g. HR-2231 approved by Priya (HR)" required></label>
+          <label>Approved CSV <input type="file" name="csv_file" accept=".csv" required></label>
+          <button class="btn primary" type="submit">Read console &amp; build plan</button>
+          <p class="error" id="new-error"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- Run -->
+    <section id="view-run" class="view hidden">
+      <div class="run-head">
+        <div>
+          <h2 id="run-title">Run</h2>
+          <div class="muted" id="run-meta"></div>
+        </div>
+        <span class="pill" id="run-status">…</span>
+      </div>
+      <ol class="stepper" id="stepper"></ol>
+
+      <div id="scenario-card" class="card hidden"></div>
+      <div id="error-card" class="card danger hidden"></div>
+
+      <div class="grid">
+        <div class="col-main">
+          <div id="plan-card" class="card hidden">
+            <div class="card-head"><h3>Plan</h3><span class="muted mono" id="plan-hash"></span></div>
+            <div class="stats" id="plan-stats"></div>
+            <h4>Role mapping <span class="muted" id="role-source"></span></h4>
+            <table class="tbl" id="role-table"></table>
+            <h4>Per-user decisions</h4>
+            <div class="scroll"><table class="tbl" id="plan-table"></table></div>
+            <div id="approve-box" class="approve hidden">
+              <h4>Step 3 · Human approval required</h4>
+              <p class="muted">Nothing is created until you approve this exact plan. Changing a role mapping
+                rebuilds the plan and needs a fresh approval.</p>
+              <label>Your name <input id="approver" placeholder="Approver name"></label>
+              <label class="check hidden" id="admin-box"><input type="checkbox" id="admin-grants">
+                I also approve the <b id="admin-count"></b> privileged (Admin) grant(s) in this plan</label>
+              <button class="btn primary" id="btn-approve">Approve plan &amp; create users</button>
+              <p class="error" id="approve-error"></p>
+            </div>
+          </div>
+
+          <div id="result-card" class="card hidden">
+            <div class="card-head"><h3>Result</h3>
+              <button class="btn warn hidden" id="btn-retry">Retry: create only the missing users</button></div>
+            <div class="tabs" id="result-tabs"></div>
+            <div class="scroll"><table class="tbl" id="result-table"></table></div>
+            <h4>Attempts</h4>
+            <table class="tbl" id="attempt-table"></table>
+          </div>
+        </div>
+
+        <div class="col-side">
+          <div class="card">
+            <div class="card-head"><h3>Live browser view</h3><span class="muted" id="busy"></span></div>
+            <a id="live-link" target="_blank"><img id="live-shot" alt="No browser activity yet"></a>
+          </div>
+          <div class="card">
+            <h3>Agent activity</h3>
+            <div id="log" class="log"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+{
+  "test_case": "TC2",
+  "scenario": "Same email twice in CSV",
+  "expected": "One user created",
+  "run_id": "run-20261023-135855-831",
+  "verdict": "pass",
+  "detail": "all checks passed",
+  "checks": [
+    [
+      "duplicate email detected in CSV",
+      true
+    ],
+    [
+      "exactly one of the duplicate rows created",
+      true
+    ],
+    [
+      "the other row skipped as duplicate",
+      true
+    ],
+    [
+      "console holds one account for that email",
+      true
+    ],
+    [
+      "all unique users created",
+      true
+    ]
+  ],
+  "input_csv": "tc2_duplicate_email.csv",
+  "console_setup": {
+    "default_role_admin": false,
+    "fail_at": null
+  },
+  "approved_by": "scenario-runner (--yes flag, scripted approval)",
+  "plan_hash": "8de93e818509c742",
+  "attempt_summaries": [
+    {
+      "created": 5,
+      "skipped": 1,
+      "failed": 0,
+      "pending": 0,
+      "console_total_after": 7,
+      "duplicate_emails_in_console": [],
+      "verified_at": "2026-10-23T08:29:01Z",
+      "attempt": 1,
+      "created_this_attempt": 5
+    }
+  ],
+  "results": {
+    "created": [
+      {
+        "record_id": "L002-9bee1d",
+        "line": 2,
+        "email": "ananya.rao@acme.example",
+        "role": "Manager",
+        "reason": "Verified in console as Manager",
+        "verification": {
+          "at": "2026-10-23T08:29:01Z",
+          "found": true,
+          "observed_role": "Manager",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L003-54170c",
+        "line": 3,
+        "email": "vihaan.das@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:01Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L004-067758",
+        "line": 4,
+        "email": "isha.pillai@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:01Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L006-650ace",
+        "line": 6,
+        "email": "arjun.malhotra@acme.example",
+        "role": "Member",
+        "reason": "Verified in console as Member",
+        "verification": {
+          "at": "2026-10-23T08:29:01Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      },
+      {
+        "record_id": "L007-247a60",
+        "line": 7,
+        "email": "saanvi.chopra@acme.example",
+        "role": "Billing",
+        "reason": "Verified in console as Billing",
+        "verification": {
+          "at": "2026-10-23T08:29:01Z",
+          "found": true,
+          "observed_role": "Billing",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      }
+    ],
+    "skipped": [
+      {
+        "record_id": "L005-54170c",
+        "line": 5,
+        "email": "vihaan.das@acme.example",
+        "role": null,
+        "reason": "Duplicate email in CSV \u2014 same as L003-54170c; only the first row is used",
+        "verification": {
+          "at": "2026-10-23T08:29:01Z",
+          "found": true,
+          "observed_role": "Member",
+          "occurrences": 1,
+          "source_url": "http://127.0.0.1:8001/t/acme/users"
+        }
+      }
+    ],
+    "failed": [],
+    "pending": []
+  },
+  "events": [
+    "2026-10-23T08:28:55Z [collect] Loaded 6 rows from tc2_duplicate_email.csv for tenant 'acme' (approval ref: SCENARIO-TC2) \u2014 0 invalid, 1 duplicate email(s)",
+    "2026-10-23T08:28:56Z [browse] Signed in to admin console",
+    "2026-10-23T08:28:56Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:28:56Z [observe] Read 2 existing users across 1 page(s)",
+    "2026-10-23T08:28:56Z [observe] Inspected 'Add user' form: 4 fields",
+    "2026-10-23T08:28:59Z [reason] Form fields identified (llm): name \u2192 'full_name', email \u2192 'work_email', role \u2192 'access_role'. The fields were matched based on their corresponding labels for full name, work email, and access level.",
+    "2026-10-23T08:28:59Z [observe] Console offers roles: Admin, Manager, Member, Billing, Viewer",
+    "2026-10-23T08:28:59Z [memory] Loaded saved role policy for 4 of 4 job title(s) (approved in earlier runs): Engineering Manager \u2192 Manager, Finance Analyst \u2192 Billing, Software Engineer \u2192 Member, Support Agent \u2192 Member",
+    "2026-10-23T08:28:59Z [reason] Role 'Engineering Manager' \u2192 Manager (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:28:59Z [reason] Role 'Finance Analyst' \u2192 Billing (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:28:59Z [reason] Role 'Software Engineer' \u2192 Member (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:28:59Z [reason] Role 'Support Agent' \u2192 Member (confidence 1.00, policy, ok): saved role policy \u2014 approved by scenario-runner (--yes flag, scripted approval) on 2026-10-23 (first decided by LLM (gemini:gemini-3.8-flash))",
+    "2026-10-23T08:28:59Z [plan] Plan ready (8de93e818509c742): create 5 in 1 batch(es) of 5, skip 1, review 0. Waiting for human approval.",
+    "2026-10-23T08:28:59Z [approve] Plan 8de93e818509c742 approved by scenario-runner (--yes flag, scripted approval) \u2014 5 user(s) to create",
+    "2026-10-23T08:28:59Z [apply] Apply attempt #1 started",
+    "2026-10-23T08:29:00Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:00Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:00Z [observe] Read 2 existing users across 1 page(s)",
+    "2026-10-23T08:29:00Z [reconcile] Reconciled ledger with live console: 5 user(s) still need creating",
+    "2026-10-23T08:29:00Z [apply] Batch 1: creating 5 user(s)",
+    "2026-10-23T08:29:00Z [apply] Created ananya.rao@acme.example as Manager (line 2)",
+    "2026-10-23T08:29:00Z [apply] Created vihaan.das@acme.example as Member (line 3)",
+    "2026-10-23T08:29:00Z [apply] Created isha.pillai@acme.example as Member (line 4)",
+    "2026-10-23T08:29:01Z [apply] Created arjun.malhotra@acme.example as Member (line 6)",
+    "2026-10-23T08:29:01Z [apply] Created saanvi.chopra@acme.example as Billing (line 7)",
+    "2026-10-23T08:29:01Z [checkpoint] Checkpoint saved after batch 1 \u2014 5 created so far",
+    "2026-10-23T08:29:01Z [browse] Signed in to admin console",
+    "2026-10-23T08:29:01Z [browse] Confirmed tenant context: Acme Corp (acme)",
+    "2026-10-23T08:29:01Z [observe] Read 7 existing users across 1 page(s)",
+    "2026-10-23T08:29:02Z [verify] Verification (fresh session, 1 page(s)): 5 created, 1 skipped, 0 failed, 0 pending",
+    "2026-10-23T08:29:02Z [scenario] TC2: PASS \u2014 all checks passed"
+  ]
+}
